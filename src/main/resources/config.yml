@@ -1,0 +1,7 @@
+twitch:
+  token: "your_twitch_oauth_token_here"
+  channels:
+    - "channel1"
+    - "channel2"
+  message_format: "[TWITCH] %nickname%: %message%"  # Format for messages
+  prefix: "[TWITCH]"

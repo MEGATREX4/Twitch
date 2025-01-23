@@ -1,0 +1,24 @@
+name: Twitch
+author: MEGATREX4
+main: org.megatrex4.twitch.Twitch
+website: https://megatrex4.netlify.app/
+description: Twitch chat plugin
+version: 1.0.0
+api-version: 1.21
+commands:
+  twitchlink:
+    description: Link your Twitch account
+    usage: /twitchlink <add|remove|reload> <channel>
+    permission: twitch.link
+
+permissions:
+  twitch.add:
+    description: Allows the user to add Twitch channels
+    default: op
+  twitch.remove:
+    description: Allows the user to remove Twitch channels
+    default: op
+  twitch.reload:
+    description: Allows the user to reload the plugin's config
+    default: op
+
