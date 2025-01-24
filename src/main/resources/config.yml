@@ -1,7 +1,23 @@
 twitch:
+  send_to_discord: false
+  discord_webhook_url: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
+
   token: "your_twitch_oauth_token_here"
+
+  player_online: false  # True means check if the player is online
   channels:
-    - "channel1"
-    - "channel2"
-  message_format: "[TWITCH] %nickname%: %message%"  # Format for messages
+    - "channel1 minecraft_name"
+    - "channel2 minecraft_name"
+  message_format: "[TWITCH] %nickname%: %message%"
   prefix: "[TWITCH]"
+  blacklist:
+    users:
+      - "bot_nickname1"
+      - "bot_nickname2"
+    prefixes:
+      - "!"
+      - "#"
+    words:
+      - "inappropriate_word1"
+      - "inappropriate_word2"
+

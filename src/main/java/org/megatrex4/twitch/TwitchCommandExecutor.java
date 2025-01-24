@@ -14,44 +14,49 @@ public class TwitchCommandExecutor implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage("Usage: /twitchlink <add|remove|reload> <channel>");
+            sender.sendMessage(plugin.getMessage("command.usage"));
             return true;
         }
 
         String action = args[0];
-        if (args.length < 2 && !action.equalsIgnoreCase("reload")) {
-            sender.sendMessage("Please specify a channel.");
-            return true;
-        }
-
         String channel = args.length > 1 ? args[1] : null;
 
         if (action.equalsIgnoreCase("add")) {
             if (sender.hasPermission("twitch.add")) {
-                plugin.addChannel(channel);
-                sender.sendMessage("Added channel: " + channel);
+                if (channel != null) {
+                    plugin.addChannel(channel);
+                    sender.sendMessage(plugin.getMessage("command.channel_added").replace("%channel%", channel));
+                } else {
+                    sender.sendMessage(plugin.getMessage("command.no_channel"));
+                }
             } else {
-                sender.sendMessage("You don't have permission to add channels.");
+                sender.sendMessage(plugin.getMessage("command.no_permission"));
             }
         } else if (action.equalsIgnoreCase("remove")) {
             if (sender.hasPermission("twitch.remove")) {
-                plugin.removeChannel(channel);
-                sender.sendMessage("Removed channel: " + channel);
+                if (channel != null) {
+                    plugin.removeChannel(channel);
+                    sender.sendMessage(plugin.getMessage("command.channel_removed").replace("%channel%", channel));
+                } else {
+                    sender.sendMessage(plugin.getMessage("command.no_channel"));
+                }
             } else {
-                sender.sendMessage("You don't have permission to remove channels.");
+                sender.sendMessage(plugin.getMessage("command.no_permission"));
             }
         } else if (action.equalsIgnoreCase("reload")) {
             if (sender.hasPermission("twitch.reload")) {
                 plugin.reloadConfig();
-                sender.sendMessage("Configuration reloaded!");
+                plugin.createMessagesFile();
+                plugin.reconnectWebSocket();
+                sender.sendMessage(plugin.getMessage("command.config_reloaded"));
+
             } else {
-                sender.sendMessage("You don't have permission to reload configuration.");
+                sender.sendMessage(plugin.getMessage("command.no_permission"));
             }
         } else {
-            sender.sendMessage("Unknown action: " + action);
+            sender.sendMessage(plugin.getMessage("command.unknown_action").replace("%action%", action));
         }
 
         return true;
     }
 }
-
