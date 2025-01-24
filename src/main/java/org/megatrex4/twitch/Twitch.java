@@ -10,6 +10,7 @@ import org.java_websocket.handshake.ServerHandshake;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -194,24 +195,33 @@ public final class Twitch extends JavaPlugin {
     }
 
     public void sendToDiscord(String nickname, String chatMessage) {
+        // Fetch configuration values
         String webhookUrl = getConfig().getString("twitch.discord_webhook_url");
+        boolean useHeads = getConfig().getBoolean("twitch.use_heads", true);
+        String customAvatarUrl = getConfig().getString("twitch.custom_avatar_url",
+                "https://media.discordapp.net/attachments/1029529713519108178/1332347300739027025/w5M5aGW.webp");
+
+        // Validate webhook URL
         if (webhookUrl == null || webhookUrl.isEmpty()) {
             logMessage("twitch.discord_webhook_not_set");
             return;
         }
 
-        String customAvatarUrl = getConfig().getString("twitch.custom_avatar_url", "https://media.discordapp.net/attachments/1029529713519108178/1332347300739027025/w5M5aGW.webp?ex=6794ec9e&is=67939b1e&hm=d8b460306534d5bcd677e966c9300ede77b8751bb4849cf354a6273ab1fdcdb2&=&format=webp"); // Fetched from config
+        // Determine avatar URL
+        String avatarUrl = useHeads
+                ? "https://mc-heads.net/avatar/" + nickname
+                : customAvatarUrl;
 
-        // Format the content
+        // Format the message content
         String content = String.format("%s", chatMessage);
 
-        // Build the JSON payload with username, avatar_url, and content
+        // Construct the JSON payload
         String payload = String.format("{"
                         + "\"username\": \"%s\","
                         + "\"avatar_url\": \"%s\","
                         + "\"content\": \"%s\""
                         + "}",
-                nickname, customAvatarUrl, content.replace("\"", "\\\""));
+                nickname, avatarUrl, content.replace("\"", "\\\""));
 
         try {
             // Open connection to the webhook URL
@@ -220,12 +230,13 @@ public final class Twitch extends JavaPlugin {
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", "application/json");
 
-            // Write the JSON payload to the request body
-            connection.getOutputStream().write(payload.getBytes());
-            connection.getOutputStream().flush();
-            connection.getOutputStream().close();
+            // Send the JSON payload
+            try (OutputStream outputStream = connection.getOutputStream()) {
+                outputStream.write(payload.getBytes());
+                outputStream.flush();
+            }
 
-            // Check the response code
+            // Handle the response
             int responseCode = connection.getResponseCode();
             if (responseCode == 204) {
                 logMessage("twitch.discord_message_sent");
@@ -236,6 +247,7 @@ public final class Twitch extends JavaPlugin {
             logMessage("twitch.discord_error", e.getMessage());
         }
     }
+
 
 
 
