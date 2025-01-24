@@ -2,7 +2,8 @@ twitch:
   #if true this is send message to discord webhook
   send_to_discord: false
   discord_webhook_url: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
-  custom_avatar_url: "https://media.discordapp.net/attachments/1029529713519108178/1332347300739027025/w5M5aGW.webp?ex=6794ec9e&is=67939b1e&hm=d8b460306534d5bcd677e966c9300ede77b8751bb4849cf354a6273ab1fdcdb2&=&format=webp" # Add your desired image URL
+  # Add your desired image URL
+  custom_avatar_url: "https://media.discordapp.net/attachments/1029529713519108178/1332347300739027025/w5M5aGW.webp?ex=6794ec9e&is=67939b1e&hm=d8b460306534d5bcd677e966c9300ede77b8751bb4849cf354a6273ab1fdcdb2&=&format=webp"
 
   token: "your_twitch_oauth_token_here"
 
