@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -122,17 +121,8 @@ public final class Twitch extends JavaPlugin {
                         if (getConfig().getBoolean("twitch.send_to_discord", false)) {
                             sendToDiscord(nickname, chatMessage);
                         }
-
-                        String minecraftName = getMinecraftNameFromTwitchChannel(nickname);
-                        if (minecraftName != null) {
-                            Player player = getServer().getPlayer(minecraftName);
-                            if (player == null || !player.isOnline()) {
-                                getServer().broadcastMessage(ChatColor.RED + "Player " + minecraftName + " is not online!");
-                            }
-                        }
                     }
                 }
-
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
@@ -176,34 +166,23 @@ public final class Twitch extends JavaPlugin {
         return false;
     }
 
-    public String getMinecraftNameFromTwitchChannel(String twitchChannel) {
+    public void addChannel(String channel) {
         List<String> channels = getConfig().getStringList("twitch.channels");
-        for (String channelWithName : channels) {
-            String[] parts = channelWithName.split(" ");
-            if (parts[0].equalsIgnoreCase(twitchChannel)) {
-                return parts[1];
-            }
-        }
-        return null;
-    }
-
-    public void addChannel(String channelWithMinecraftName) {
-        List<String> channels = getConfig().getStringList("twitch.channels");
-        if (!channels.contains(channelWithMinecraftName)) {
-            channels.add(channelWithMinecraftName);
+        if (!channels.contains(channel)) {
+            channels.add(channel);
             getConfig().set("twitch.channels", channels);
             saveConfig();
-            logMessage("twitch.channel_added", channelWithMinecraftName);
+            logMessage("twitch.channel_added", channel);
         }
     }
 
-    public void removeChannel(String channelWithMinecraftName) {
+    public void removeChannel(String channel) {
         List<String> channels = getConfig().getStringList("twitch.channels");
-        if (channels.contains(channelWithMinecraftName)) {
-            channels.remove(channelWithMinecraftName);
+        if (channels.contains(channel)) {
+            channels.remove(channel);
             getConfig().set("twitch.channels", channels);
             saveConfig();
-            logMessage("twitch.channel_removed", channelWithMinecraftName);
+            logMessage("twitch.channel_removed", channel);
         }
     }
 
@@ -221,7 +200,7 @@ public final class Twitch extends JavaPlugin {
             return;
         }
 
-        String customAvatarUrl = "https://media.discordapp.net/attachments/1029529713519108178/1332347300739027025/w5M5aGW.webp?ex=6794ec9e&is=67939b1e&hm=d8b460306534d5bcd677e966c9300ede77b8751bb4849cf354a6273ab1fdcdb2&=&format=webp"; // Replace with your desired image URL
+        String customAvatarUrl = getConfig().getString("twitch.custom_avatar_url", "https://media.discordapp.net/attachments/1029529713519108178/1332347300739027025/w5M5aGW.webp?ex=6794ec9e&is=67939b1e&hm=d8b460306534d5bcd677e966c9300ede77b8751bb4849cf354a6273ab1fdcdb2&=&format=webp"); // Fetched from config
 
         // Format the content
         String content = String.format("%s", chatMessage);

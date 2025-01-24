@@ -10,6 +10,11 @@ twitch.blacklist.word: '&cMessage ignored due to blacklisted word: %0%'
 twitch.channel_added: '&aChannel added: %0%'
 twitch.channel_removed: '&cChannel removed: %0%'
 
+twitch.discord_webhook_not_set: '&cWebhook URL not set in configuration.'
+twitch.discord_message_sent: '&aDiscord message sent successfully.'
+twitch.discord_message_error: '&cFailed to send Discord message. Response code: %0%'
+twitch.discord_error: '&cError sending Discord message: %0%'
+
 command.usage: '&eUsage: /twitchlink <add|remove|reload> <channel>'
 command.no_channel: '&cPlease specify a channel.'
 command.no_permission: '&cYou do not have permission to perform this command.'
