@@ -8,8 +8,8 @@ twitch:
   token: "your_twitch_oauth_token_here"
 
   channels:
-    - "channel1 minecraft_name"
-    - "channel2 minecraft_name"
+    - "channel1"
+    - "channel2"
   message_format: "[TWITCH] %nickname%: %message%"
   prefix: "[TWITCH]"
   blacklist:
