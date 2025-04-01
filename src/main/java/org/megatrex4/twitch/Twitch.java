@@ -79,12 +79,14 @@ public final class Twitch extends JavaPlugin {
         List<String> channels = getConfig().getStringList("twitch.channels");
 
         if (channels.isEmpty()) {
+            if (isDebug()) {
             logMessage("twitch.no_channels");
+            }
             return;
         }
 
         try {
-            URI uri = new URI("wss://irc-ws.chat.twitch.tv:443");
+            URI uri = new URI("ws://irc-ws.chat.twitch.tv:80");
             webSocketClient = new WebSocketClient(uri) {
                 @Override
                 public void onOpen(ServerHandshake handshake) {
@@ -95,13 +97,16 @@ public final class Twitch extends JavaPlugin {
                         send("JOIN #" + channel);
                     }
 
-                    logMessage("twitch.connected");
+                    if (isDebug()){
+                        logMessage("twitch.connected");
+                    }
                 }
 
                 @Override
                 public void onMessage(String message) {
                     if (message.startsWith("PING")) {
-                        send("PONG :tmi.twitch.tv");
+                        send("PONG " + message.substring(5)); // Respond with what Twitch sent
+                        return;
                     }
 
                     if (message.contains("PRIVMSG")) {
@@ -127,18 +132,34 @@ public final class Twitch extends JavaPlugin {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    logMessage("twitch.disconnected");
+                    if (!isEnabled()) {
+                        return;  // Skip task scheduling if the plugin is disabled
+                    }
+
+                    if (isDebug()) {
+                        logMessage("twitch.disconnected", reason);
+                    }
+                    getServer().getScheduler().runTaskLater(Twitch.this, Twitch.this::reconnectWebSocket, 100L);
                 }
 
                 @Override
                 public void onError(Exception ex) {
-                    logMessage("twitch.error", ex.getMessage());
+                    if (!isEnabled()) {
+                        return;  // Skip task scheduling if the plugin is disabled
+                    }
+
+                    if (isDebug()) {
+                        logMessage("twitch.error", ex.getMessage());
+                    }
+                    getServer().getScheduler().runTaskLater(Twitch.this, Twitch.this::reconnectWebSocket, 100L);
                 }
             };
 
             webSocketClient.connect();
         } catch (URISyntaxException e) {
-            logMessage("twitch.websocket_error", e.getMessage());
+            if (isDebug()) {
+                logMessage("twitch.websocket_error", e.getMessage());
+            }
         }
     }
 
@@ -148,18 +169,24 @@ public final class Twitch extends JavaPlugin {
         List<String> blacklistedWords = getConfig().getStringList("twitch.blacklist.words");
 
         if (blacklistedUsers.contains(nickname)) {
-            logMessage("twitch.blacklist.user", nickname);
+            if (isDebug()) {
+                logMessage("twitch.blacklist.user", nickname);
+            }
             return true;
         }
 
         if (!chatMessage.isEmpty() && blacklistedPrefixes.contains(String.valueOf(chatMessage.charAt(0)))) {
-            logMessage("twitch.blacklist.prefix", String.valueOf(chatMessage.charAt(0)));
+            if (isDebug()) {
+                logMessage("twitch.blacklist.prefix", String.valueOf(chatMessage.charAt(0)));
+            }
             return true;
         }
 
         for (String word : blacklistedWords) {
             if (chatMessage.contains(word)) {
-                logMessage("twitch.blacklist.word", word);
+                if (isDebug()) {
+                    logMessage("twitch.blacklist.word", word);
+                }
                 return true;
             }
         }
@@ -173,7 +200,9 @@ public final class Twitch extends JavaPlugin {
             channels.add(channel);
             getConfig().set("twitch.channels", channels);
             saveConfig();
-            logMessage("twitch.channel_added", channel);
+            if (isDebug()) {
+                logMessage("twitch.channel_added", channel);
+            }
         }
     }
 
@@ -183,12 +212,17 @@ public final class Twitch extends JavaPlugin {
             channels.remove(channel);
             getConfig().set("twitch.channels", channels);
             saveConfig();
-            logMessage("twitch.channel_removed", channel);
+            if (isDebug()) {
+                logMessage("twitch.channel_removed", channel);
+            }
         }
     }
 
     public void reconnectWebSocket() {
         if (webSocketClient != null && webSocketClient.isOpen()) {
+            if (isDebug()) {
+                    logMessage("twitch.reconnect");
+            }
             webSocketClient.close();
         }
         connectToWebSocket();
@@ -239,16 +273,22 @@ public final class Twitch extends JavaPlugin {
             // Handle the response
             int responseCode = connection.getResponseCode();
             if (responseCode == 204) {
-                logMessage("twitch.discord_message_sent");
+                if (isDebug()) {
+                    logMessage("twitch.discord_message_sent");
+                }
             } else {
-                logMessage("twitch.discord_message_error", responseCode);
+                if (isDebug()) {
+                    logMessage("twitch.discord_message_error", responseCode);
+                }
             }
         } catch (IOException e) {
-            logMessage("twitch.discord_error", e.getMessage());
+            if (isDebug()) {
+                logMessage("twitch.discord_error", e.getMessage());
+            }
         }
     }
 
-
-
-
+    public boolean isDebug() {
+        return getConfig().getBoolean("debug", false);
+    }
 }

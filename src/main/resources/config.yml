@@ -1,5 +1,6 @@
 twitch:
   #if true this is send message to discord webhook
+  debug: false
   send_to_discord: false
   #this is use image from heads api if u dont need custom bot image\avatar
   use_heads: true

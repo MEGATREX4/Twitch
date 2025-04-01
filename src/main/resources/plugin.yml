@@ -3,7 +3,7 @@ author: MEGATREX4
 main: org.megatrex4.twitch.Twitch
 website: https://megatrex4.netlify.app/
 description: Twitch chat plugin
-version: 1.0.0
+version: 1.2
 api-version: 1.21
 commands:
   twitchlink:

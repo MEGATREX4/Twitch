@@ -9,6 +9,7 @@ twitch.blacklist.prefix: '&cMessage ignored due to blacklisted prefix: %0%'
 twitch.blacklist.word: '&cMessage ignored due to blacklisted word: %0%'
 twitch.channel_added: '&aChannel added: %0%'
 twitch.channel_removed: '&cChannel removed: %0%'
+twitch.reconnect: '&aReconnecting to Twitch IRC server...'
 
 twitch.discord_webhook_not_set: '&cWebhook URL not set in configuration.'
 twitch.discord_message_sent: '&aDiscord message sent successfully.'
