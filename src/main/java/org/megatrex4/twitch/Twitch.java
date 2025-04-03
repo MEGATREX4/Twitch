@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -15,7 +16,10 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public final class Twitch extends JavaPlugin {
 
@@ -77,11 +81,17 @@ public final class Twitch extends JavaPlugin {
     private void connectToWebSocket() {
         String oauthToken = getConfig().getString("twitch.token");
         List<String> channels = getConfig().getStringList("twitch.channels");
-
-        if (channels.isEmpty()) {
-            if (isDebug()) {
-            logMessage("twitch.no_channels");
+        List<String> streamers = new ArrayList<>();
+        for (String channel : channels) {
+            String[] parts = channel.split(":");
+            streamers.add(parts[0].trim());
+            if (parts.length > 1) {
+                streamers.add(parts[1].trim());
             }
+        }
+
+        if (streamers.isEmpty()) {
+            logMessage("twitch.no_channels");
             return;
         }
 
@@ -93,65 +103,68 @@ public final class Twitch extends JavaPlugin {
                     send("PASS " + oauthToken);
                     send("NICK justinfan12345");
 
-                    for (String channel : channels) {
+                    for (String channel : streamers) {
                         send("JOIN #" + channel);
                     }
-
                     if (isDebug()){
-                        logMessage("twitch.connected");
+                    logMessage("twitch.connected");
                     }
                 }
 
                 @Override
                 public void onMessage(String message) {
+                    // Handle PING-PONG for connection keep-alive
                     if (message.startsWith("PING")) {
-                        send("PONG " + message.substring(5)); // Respond with what Twitch sent
-                        return;
+                        send("PONG :tmi.twitch.tv");
                     }
 
+                    // Check if the message is a PRIVMSG (chat message)
                     if (message.contains("PRIVMSG")) {
-                        String nickname = message.split("!")[0].substring(1);
-                        String chatMessage = message.split(" :")[1].replaceAll("[\\r\\n]", "");
 
-                        if (isBlacklisted(nickname, chatMessage)) return;
+                        String streamer = message.split(" ")[2].substring(1); // Get the part after '#', which is the channel name (streamer)
+                        if (streamerOnline(streamer)) {
+                            // Extract the nickname (sender's Twitch username) from the message
+                            String nickname = message.split("!")[0].substring(1);
 
-                        String format = getConfig().getString("twitch.message_format", "[TWITCH] %nickname%: %message%");
-                        String formattedMessage = format
-                                .replace("%nickname%", nickname)
-                                .replace("%message%", chatMessage);
+                            // Extract the chat message (text after " :")
+                            String chatMessage = message.split(" :")[1].replaceAll("[\\r\\n]", "");
 
-                        formattedMessage = ChatColor.translateAlternateColorCodes('&', formattedMessage);
-                        getServer().broadcastMessage(formattedMessage);
+                            // Optional: If the message is blacklisted, don't process it further
+                            if (isBlacklisted(nickname, chatMessage)) return;
 
-                        // Send to Discord if enabled
-                        if (getConfig().getBoolean("twitch.send_to_discord", false)) {
-                            sendToDiscord(nickname, chatMessage);
+                            // Get message format from config (or default to a simple format)
+                            String format = getConfig().getString("twitch.message_format", "[TWITCH] %nickname%: %message%");
+                            String formattedMessage = format
+                                    .replace("%nickname%", nickname)
+                                    .replace("%message%", chatMessage);
+
+                            // Convert color codes and send it as a broadcast message
+                            formattedMessage = ChatColor.translateAlternateColorCodes('&', formattedMessage);
+                            getServer().broadcastMessage(formattedMessage);
+
+                            // Send the message to Discord if enabled
+                            if (getConfig().getBoolean("twitch.send_to_discord", false)) {
+                                sendToDiscord(nickname, chatMessage);
+                            }
                         }
                     }
                 }
 
+
+
+
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    if (!isEnabled()) {
-                        return;  // Skip task scheduling if the plugin is disabled
-                    }
-
                     if (isDebug()) {
-                        logMessage("twitch.disconnected", reason);
+                        logMessage("twitch.disconnected");
                     }
-                    getServer().getScheduler().runTaskLater(Twitch.this, Twitch.this::reconnectWebSocket, 100L);
                 }
 
                 @Override
                 public void onError(Exception ex) {
-                    if (!isEnabled()) {
-                        return;  // Skip task scheduling if the plugin is disabled
-                    }
-
                     if (isDebug()) {
                         logMessage("twitch.error", ex.getMessage());
                     }
-                    getServer().getScheduler().runTaskLater(Twitch.this, Twitch.this::reconnectWebSocket, 100L);
                 }
             };
 
@@ -163,22 +176,46 @@ public final class Twitch extends JavaPlugin {
         }
     }
 
+    public boolean streamerOnline(String channel) {
+        List<String> channelData = getConfig().getStringList("twitch.channels");
+        for (String channelEntry : channelData) {
+            String[] parts = channelEntry.split(":");
+            if (parts[0].trim().equalsIgnoreCase(channel)) {
+
+                if (parts.length > 1) {
+                    String streamerNickname = parts[1].trim();
+
+                    Player streamer = getServer().getPlayer(streamerNickname);
+                    if (streamer != null) {
+                        boolean isOnline = streamer.isOnline();
+                        return isOnline;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     private boolean isBlacklisted(String nickname, String chatMessage) {
         List<String> blacklistedUsers = getConfig().getStringList("twitch.blacklist.users");
         List<String> blacklistedPrefixes = getConfig().getStringList("twitch.blacklist.prefixes");
         List<String> blacklistedWords = getConfig().getStringList("twitch.blacklist.words");
 
         if (blacklistedUsers.contains(nickname)) {
-            if (isDebug()) {
+            if (isDebug()){
                 logMessage("twitch.blacklist.user", nickname);
-            }
+        }
             return true;
         }
 
         if (!chatMessage.isEmpty() && blacklistedPrefixes.contains(String.valueOf(chatMessage.charAt(0)))) {
-            if (isDebug()) {
+            if (isDebug()){
                 logMessage("twitch.blacklist.prefix", String.valueOf(chatMessage.charAt(0)));
-            }
+        }
             return true;
         }
 
@@ -196,33 +233,63 @@ public final class Twitch extends JavaPlugin {
 
     public void addChannel(String channel) {
         List<String> channels = getConfig().getStringList("twitch.channels");
-        if (!channels.contains(channel)) {
-            channels.add(channel);
+        String channelData = channel;  // Channel without nickname
+
+        if (!channels.contains(channelData)) {
+            channels.add(channelData);
             getConfig().set("twitch.channels", channels);
             saveConfig();
             if (isDebug()) {
-                logMessage("twitch.channel_added", channel);
+                logMessage("twitch.channel_added", channelData);
             }
+            reconnectWebSocket();
         }
     }
+
+    public void addChannel(String channel, String streamerNickname) {
+        List<String> channels = getConfig().getStringList("twitch.channels");
+        String channelData = channel + ":" + streamerNickname;  // Channel with nickname
+
+        if (!channels.contains(channelData)) {
+            channels.add(channelData);
+            getConfig().set("twitch.channels", channels);
+            saveConfig();
+            if (isDebug()) {
+                logMessage("twitch.channel_added_with_nickname", channelData);
+            }
+            reconnectWebSocket();
+        }
+    }
+
 
     public void removeChannel(String channel) {
         List<String> channels = getConfig().getStringList("twitch.channels");
-        if (channels.contains(channel)) {
-            channels.remove(channel);
-            getConfig().set("twitch.channels", channels);
-            saveConfig();
-            if (isDebug()) {
-                logMessage("twitch.channel_removed", channel);
+
+        // First check if the channel exists in the list
+        for (String channelEntry : channels) {
+            String[] parts = channelEntry.split(":");
+
+            // If the channel matches and the format is correct
+            if (parts[0].trim().equalsIgnoreCase(channel)) {
+                // Remove the channel entry with or without nickname
+                channels.remove(channelEntry);
+                getConfig().set("twitch.channels", channels);
+                saveConfig();
+                if (isDebug()) {
+                    logMessage("twitch.channel_removed", channelEntry);
+                }
+                reconnectWebSocket();
+                return; // Exit after removing the channel
             }
         }
+
+        // If no matching channel is found
+        logMessage("twitch.channel_not_found", channel);
     }
+
 
     public void reconnectWebSocket() {
         if (webSocketClient != null && webSocketClient.isOpen()) {
-            if (isDebug()) {
-                    logMessage("twitch.reconnect");
-            }
             webSocketClient.close();
         }
         connectToWebSocket();
@@ -283,8 +350,9 @@ public final class Twitch extends JavaPlugin {
             }
         } catch (IOException e) {
             if (isDebug()) {
-                logMessage("twitch.discord_error", e.getMessage());
+                e.printStackTrace();
             }
+            logMessage("twitch.discord_error", e.getMessage());
         }
     }
 

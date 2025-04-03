@@ -12,8 +12,8 @@ twitch:
   token: "your_twitch_oauth_token_here"
 
   channels:
-    - "channel1"
-    - "channel2"
+    - "channel1:streamer_nickname"   # Channel with streamer nickname
+    - "channel2"                      # Channel without streamer nickname
   message_format: "[TWITCH] %nickname%: %message%"
   prefix: "[TWITCH]"
   blacklist:

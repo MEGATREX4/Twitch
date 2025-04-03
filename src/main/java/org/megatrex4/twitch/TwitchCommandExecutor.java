@@ -19,13 +19,26 @@ public class TwitchCommandExecutor implements CommandExecutor {
         }
 
         String action = args[0];
-        String channel = args.length > 1 ? args[1] : null;
 
+        // Add action
         if (action.equalsIgnoreCase("add")) {
             if (sender.hasPermission("twitch.add")) {
-                if (channel != null) {
-                    plugin.addChannel(channel);
-                    sender.sendMessage(plugin.getMessage("command.channel_added").replace("%channel%", channel));
+                if (args.length >= 2) {
+                    String channel = args[1];
+                    if (args.length == 2) {
+                        // Channel without streamer nickname
+                        plugin.addChannel(channel);
+                        sender.sendMessage(plugin.getMessage("command.channel_added").replace("%channel%", channel));
+                    } else if (args.length == 3) {
+                        // Channel with streamer nickname
+                        String streamerNickname = args[2];
+                        plugin.addChannel(channel, streamerNickname);
+                        sender.sendMessage(plugin.getMessage("command.channel_added_with_nickname")
+                                .replace("%channel%", channel)
+                                .replace("%streamer_nickname%", streamerNickname));
+                    } else {
+                        sender.sendMessage(plugin.getMessage("command.invalid_arguments"));
+                    }
                 } else {
                     sender.sendMessage(plugin.getMessage("command.no_channel"));
                 }
@@ -34,7 +47,8 @@ public class TwitchCommandExecutor implements CommandExecutor {
             }
         } else if (action.equalsIgnoreCase("remove")) {
             if (sender.hasPermission("twitch.remove")) {
-                if (channel != null) {
+                if (args.length >= 2) {
+                    String channel = args[1];
                     plugin.removeChannel(channel);
                     sender.sendMessage(plugin.getMessage("command.channel_removed").replace("%channel%", channel));
                 } else {
@@ -49,7 +63,6 @@ public class TwitchCommandExecutor implements CommandExecutor {
                 plugin.createMessagesFile();
                 plugin.reconnectWebSocket();
                 sender.sendMessage(plugin.getMessage("command.config_reloaded"));
-
             } else {
                 sender.sendMessage(plugin.getMessage("command.no_permission"));
             }
