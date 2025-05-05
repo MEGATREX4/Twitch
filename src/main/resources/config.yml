@@ -9,7 +9,7 @@ twitch:
   custom_avatar_url: "https://media.discordapp.net/attachments/1029529713519108178/1332347300739027025/w5M5aGW.webp?ex=6794ec9e&is=67939b1e&hm=d8b460306534d5bcd677e966c9300ede77b8751bb4849cf354a6273ab1fdcdb2&=&format=webp"
 
 
-  token: "your_twitch_oauth_token_here"
+  token: "oauth:123456789123456789123456789123456789"
 
   channels:
     - "channel1:streamer_nickname"   # Channel with streamer nickname

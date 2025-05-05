@@ -4,7 +4,7 @@
   <groupId>org.megatrex4</groupId>
   <artifactId>twitch</artifactId>
   <name>Twitch</name>
-  <version>1.4</version>
+  <version>1.5</version>
   <build>
     <defaultGoal>clean package</defaultGoal>
     <resources>
@@ -58,6 +58,10 @@
     </plugins>
   </build>
   <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
     <repository>
       <id>papermc-repo</id>
       <url>https://repo.papermc.io/repository/maven-public/</url>

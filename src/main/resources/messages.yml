@@ -2,25 +2,19 @@ plugin.disabled: '&cTwitch plugin disabled!'
 twitch.no_channels: '&cNo Twitch channels are configured!'
 twitch.connected: '&aConnected to Twitch IRC server.'
 twitch.disconnected: '&cDisconnected from Twitch IRC server.'
-twitch.error: '&cError with Twitch WebSocket connection: %0%'
+twitch.error: '&cError with Twitch connection: %0%'
 twitch.websocket_error: '&cError creating WebSocket connection: %0%'
-twitch.blacklist.user: '&cMessage ignored from blacklisted user: %0%'
-twitch.blacklist.prefix: '&cMessage ignored due to blacklisted prefix: %0%'
-twitch.blacklist.word: '&cMessage ignored due to blacklisted word: %0%'
-twitch.channel_added: '&aChannel added: %0%'
-twitch.channel_removed: '&cChannel removed: %0%'
 twitch.reconnect: '&aReconnecting to Twitch IRC server...'
 
 twitch.discord_webhook_not_set: '&cWebhook URL not set in configuration.'
-twitch.discord_message_sent: '&aDiscord message sent successfully.'
 twitch.discord_message_error: '&cFailed to send Discord message. Response code: %0%'
 twitch.discord_error: '&cError sending Discord message: %0%'
 
-command.usage: '&eUsage: /twitchlink <add|remove|reload> <channel>'
-command.no_channel: '&cPlease specify a channel.'
-command.no_permission: '&cYou do not have permission to perform this command.'
-command.channel_added: '&aChannel "%channel%" added successfully.'
-command.channel_added_with_nickname: '&aChannel %channel% added with streamer nickname %streamer_nickname%'
-command.channel_removed: '&cChannel "%channel%" removed successfully.'
-command.config_reloaded: '&aConfiguration reloaded and connection restarted!'
-command.unknown_action: '&cUnknown action: %action%'
+command:
+  usage: "&cUsage: /twitchlink <add|remove|reload> <channel>"
+  no_permission: "&cYou don't have permission to do that."
+  no_channel: "&cYou need to specify a channel!"
+  channel_added: "&aChannel &e%channel% &ahas been added!"
+  channel_removed: "&cChannel &e%channel% &chas been removed!"
+  config_reloaded: "&aConfiguration reloaded!"
+  unknown_action: "&cUnknown action: &e%action%"
