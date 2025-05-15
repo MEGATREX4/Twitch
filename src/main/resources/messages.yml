@@ -1,14 +1,19 @@
-plugin.disabled: '&cTwitch plugin disabled!'
-twitch.no_channels: '&cNo Twitch channels are configured!'
-twitch.connected: '&aConnected to Twitch IRC server.'
-twitch.disconnected: '&cDisconnected from Twitch IRC server.'
-twitch.error: '&cError with Twitch connection: %0%'
-twitch.websocket_error: '&cError creating WebSocket connection: %0%'
-twitch.reconnect: '&aReconnecting to Twitch IRC server...'
-
-twitch.discord_webhook_not_set: '&cWebhook URL not set in configuration.'
-twitch.discord_message_error: '&cFailed to send Discord message. Response code: %0%'
-twitch.discord_error: '&cError sending Discord message: %0%'
+twitch:
+  plugin.disabled: '&cTwitch plugin disabled!'
+  no_channels: '&cNo Twitch channels are configured!'
+  connected: '&aConnected to Twitch IRC server.'
+  disconnected: '&cDisconnected from Twitch IRC server.'
+  error: '&cError with Twitch connection: %0%'
+  websocket_error: '&cError creating WebSocket connection: %0%'
+  reconnect: '&aReconnecting to Twitch IRC server...'
+  config_reloaded: '&aConfiguration reloaded!'
+  db_connected: '&aConnected to MySQL via JDBC URL.'
+  db_failed: '&cFailed to connect to DB: %0%'
+  msg_update: '&7messages.yml updated with missing default keys.'
+  msg_update_fail: '&cFailed to update messages.yml: %0%'
+  discord_webhook_not_set: '&cWebhook URL not set in configuration.'
+  discord_message_error: '&cFailed to send Discord message. Response code: %0%'
+  discord_error: '&cError sending Discord message: %0%'
 
 command:
   usage: "&cUsage: /twitchlink <add|remove|reload> <channel>"
@@ -18,3 +23,8 @@ command:
   channel_removed: "&cChannel &e%channel% &chas been removed!"
   config_reloaded: "&aConfiguration reloaded!"
   unknown_action: "&cUnknown action: &e%action%"
+  blacklist_usage: "§cUsage: /twitchlink blacklist <add|remove> <word|prefix|user> <value>"
+  unknown_blacklist_type: "§cUnknown blacklist type: %type%"
+  blacklist_add_success: "§aBlacklist add successful: %type% → %value%"
+  blacklist_remove_success: "§aBlacklist remove successful: %type% → %value%"
+  nothingChanges: "§cNo changes were made."

@@ -1,21 +1,20 @@
 twitch:
-  #if true this is send message to discord webhook
-  debug: false
-  send_to_discord: false
-  #this is use image from heads api if u dont need custom bot image\avatar
-  use_heads: true
-  discord_webhook_url: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
-  # Add your custom image for your bot
-  custom_avatar_url: "https://media.discordapp.net/attachments/1029529713519108178/1332347300739027025/w5M5aGW.webp?ex=6794ec9e&is=67939b1e&hm=d8b460306534d5bcd677e966c9300ede77b8751bb4849cf354a6273ab1fdcdb2&=&format=webp"
+  debug: false  # Enables debug logging
+  send_to_discord: false  # Sends Twitch messages to a Discord webhook
+  token: "oauth:your_token_here"  # OAuth token for Twitch bot
 
+  message_format: "[TWITCH] %nickname%: %message%"  # Format for Twitch messages in Minecraft chat
+  prefix: "[TWITCH]"  # Prefix used in plugin messages
 
-  token: "oauth:123456789123456789123456789123456789"
+  discord:
+    use_heads: true  # Use player avatars from mc-heads.net
+    webhook_url: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"  # Discord webhook URL
+    custom_avatar_url: "https://example.com/avatar.png"  # Custom avatar URL if use_heads is false
 
   channels:
-    - "channel1:streamer_nickname"   # Channel with streamer nickname
-    - "channel2"                      # Channel without streamer nickname
-  message_format: "[TWITCH] %nickname%: %message%"
-  prefix: "[TWITCH]"
+    - "channel1:streamer_nickname"  # Channel with linked Minecraft player
+    - "channel2"  # Channel without linked player
+
   blacklist:
     users:
       - "bot_nickname1"
@@ -26,3 +25,11 @@ twitch:
     words:
       - "inappropriate_word1"
       - "inappropriate_word2"
+
+sql:
+  enabled: false  # Enables MySQL connection
+  host: "localhost"
+  port: 3306
+  database: "twitch"
+  username: "user"
+  password: "pass"

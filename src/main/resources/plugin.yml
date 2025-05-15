@@ -1,15 +1,15 @@
 name: Twitch
 author: MEGATREX4
 main: org.megatrex4.twitch.Twitch
-version: 1.5
+version: 1.7
 api-version: 1.21
 website: https://megatrex4.netlify.app/
 description: Twitch chat plugin
 
 commands:
   twitchlink:
-    description: Link your Twitch account
-    usage: /twitchlink <add|remove|reload> <channel>
+    description: Twitch control command
+    usage: /twitchlink <add|remove|reload|blacklist>
     permission: twitch.link
 
 permissions:
@@ -22,3 +22,7 @@ permissions:
   twitch.reload:
     description: Allows reloading the plugin
     default: op
+  twitch.blacklist:
+    description: Allows modifying blacklist (add/remove word/prefix/user)
+    default: op
+
