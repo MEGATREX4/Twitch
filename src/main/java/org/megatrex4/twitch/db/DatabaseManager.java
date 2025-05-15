@@ -62,6 +62,10 @@ public class DatabaseManager {
         }
     }
 
+    public HikariDataSource getDataSource() {
+        return dataSource;
+    }
+
     public List<String> fetchColumn(String query) {
         List<String> results = new ArrayList<>();
         try (Connection conn = dataSource.getConnection();

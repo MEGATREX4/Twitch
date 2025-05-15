@@ -1,3 +1,7 @@
+sql:
+  enabled: false  # Enables MySQL connection
+  jdbc: "jdbc:mysql://localhost:3306/twitch?user=root&password=password"  # JDBC URL for MySQL connection
+
 twitch:
   debug: false  # Enables debug logging
   send_to_discord: false  # Sends Twitch messages to a Discord webhook
@@ -11,6 +15,8 @@ twitch:
     webhook_url: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"  # Discord webhook URL
     custom_avatar_url: "https://example.com/avatar.png"  # Custom avatar URL if use_heads is false
 
+
+# if you use SQL it is not needed, you can leave this part out and it will work the same from SQL database
   channels:
     - "channel1:streamer_nickname"  # Channel with linked Minecraft player
     - "channel2"  # Channel without linked player
@@ -26,10 +32,4 @@ twitch:
       - "inappropriate_word1"
       - "inappropriate_word2"
 
-sql:
-  enabled: false  # Enables MySQL connection
-  host: "localhost"
-  port: 3306
-  database: "twitch"
-  username: "user"
-  password: "pass"
+

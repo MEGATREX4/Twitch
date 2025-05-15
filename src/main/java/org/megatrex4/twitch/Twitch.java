@@ -26,6 +26,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
 
 public final class Twitch extends JavaPlugin {
@@ -219,19 +222,45 @@ public final class Twitch extends JavaPlugin {
     public boolean streamerOnlineSafe(String channel) {
         if (!isEnabled()) return false;
 
-        List<String> channels = getConfig().getStringList("twitch.channels");
-        for (String entry : channels) {
-            String[] parts = entry.split(":");
-            if (parts[0].trim().equalsIgnoreCase(channel)) {
-                if (parts.length > 1) {
-                    Player player = Bukkit.getPlayerExact(parts[1].trim());
-                    return player != null && player.isOnline();
+        if (getConfig().getBoolean("sql.enabled", false)) {
+            try (Connection conn = databaseManager.getDataSource().getConnection();
+                 PreparedStatement stmt = conn.prepareStatement("SELECT channel, player_name FROM twitch_streamers");
+                 ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    String dbChannel = rs.getString("channel");
+                    String playerName = rs.getString("player_name");
+
+                    if (dbChannel.equalsIgnoreCase(channel)) {
+                        if (playerName != null && !playerName.isBlank()) {
+                            Player player = Bukkit.getPlayerExact(playerName.trim());
+                            return player != null && player.isOnline();
+                        }
+                        return true;
+                    }
                 }
-                return true;
+
+            } catch (Exception e) {
+                getLogger().warning("Failed to check online streamer: " + e.getMessage());
+            }
+        } else {
+            List<String> entries = getConfig().getStringList("twitch.channels");
+            for (String entry : entries) {
+                String[] parts = entry.split(":");
+                if (parts[0].equalsIgnoreCase(channel)) {
+                    if (parts.length > 1) {
+                        Player player = Bukkit.getPlayerExact(parts[1].trim());
+                        return player != null && player.isOnline();
+                    }
+                    return true;
+                }
             }
         }
+
         return false;
     }
+
+
 
     private boolean isBlacklisted(String nickname, String chatMessage) {
         return dataProvider.isUserBlacklisted(nickname) || dataProvider.isMessageBlacklisted(chatMessage);
