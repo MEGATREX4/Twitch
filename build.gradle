@@ -34,6 +34,7 @@ dependencies {
 	modImplementation include("com.github.twitch4j:twitch4j:${project.twitch4j_version}")
 
 	// Include necessary transitive dependencies that might not be pulled automatically
+	modImplementation include("com.github.philippheuer.events4j:events4j-api:0.12.2")
 	modImplementation include("com.github.philippheuer.events4j:events4j-core:0.12.2")
 	modImplementation include("com.github.philippheuer.events4j:events4j-handler-simple:0.12.2")
 
