@@ -9,7 +9,6 @@ import com.megatrex4.config.Config;
 import com.megatrex4.config.ConfigManager;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -82,8 +81,7 @@ public class Twitch implements ModInitializer {
 		String oauthToken = config.twitch.token;
 
 		if (oauthToken == null || oauthToken.equals("oauth:your_token_here") || oauthToken.isBlank()) {
-			LOGGER.error("Twitch OAuth token is not configured. Please set it in 'config/twitch.json'.");
-			return;
+			LOGGER.error("Twitch OAuth token is not configured. Please set it in 'config/twitch.json'. This is not a required field, but if u need a PM feature, u need to set it.(PM to implemented yet, but i think in feature it can be added)");
 		}
 
 		if (config.streamers.isEmpty()) {

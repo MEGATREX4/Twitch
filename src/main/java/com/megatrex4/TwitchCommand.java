@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
@@ -22,7 +23,7 @@ public class TwitchCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("twitch")
-                .requires(source -> source.hasPermissionLevel(2)) // Default OP level
+                .requires(source -> Permissions.hasPermissionLevel(source, PermissionLevel.GAMEMASTERS)) // Default OP level
                 .then(literal("reload")
                         .executes(TwitchCommand::reload)
                 )
