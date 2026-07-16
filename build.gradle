@@ -26,12 +26,15 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+	include "commons-configuration:commons-configuration:1.10"
+	include "commons-lang:commons-lang:2.6"
 	// Placeholder API
 	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_api_version}")
 
 	// Twitch4J and its critical dependencies
 	// Include them all in the JAR
 	modImplementation include("com.github.twitch4j:twitch4j:${project.twitch4j_version}")
+
 }
 
 processResources {

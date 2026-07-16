@@ -2,6 +2,7 @@ package com.megatrex4.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.megatrex4.Twitch;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -27,6 +28,20 @@ public class ConfigManager {
                 if (config == null) {
                     Twitch.LOGGER.warn("Config file was empty or malformed. Creating a new one.");
                     createNewConfig();
+                } else {
+                    sanitize(config);
+                }
+            } catch (JsonSyntaxException e) {
+                // Never crash the whole server on a bad config edit
+                Twitch.LOGGER.error(
+                        "Invalid JSON in config/twitch.json ({}). Using defaults until you fix the file. " +
+                                "Common issues: missing comma, extra '}}', trailing comma, unquoted text.",
+                        e.getMessage()
+                );
+                if (config == null) {
+                    createNewConfig();
+                } else {
+                    Twitch.LOGGER.warn("Keeping previously loaded config in memory.");
                 }
             } catch (IOException e) {
                 Twitch.LOGGER.error("Failed to read config file, using default values.", e);
@@ -36,6 +51,24 @@ public class ConfigManager {
             Twitch.LOGGER.info("No config file found, creating a new one.");
             createNewConfig();
         }
+    }
+
+    /** Fill null nested objects after loading older or partial configs. */
+    private static void sanitize(Config c) {
+        if (c.twitch == null) c.twitch = new Config.TwitchSettings();
+        if (c.streamers == null) c.streamers = new java.util.ArrayList<>();
+        if (c.blacklist == null) c.blacklist = new Config.Blacklist();
+        if (c.twitch.discord == null) c.twitch.discord = new Config.DiscordSettings();
+        if (c.twitch.liveAnnouncement == null) c.twitch.liveAnnouncement = new Config.LiveAnnouncement();
+        if (c.twitch.playerHoverFormat == null) {
+            c.twitch.playerHoverFormat = "&dStreamer: &f%channel%";
+        }
+        if (c.twitch.messageFormat == null) {
+            c.twitch.messageFormat = "<&5[TWITCH]&r> <%player%> <%twitch_user%>: %twitch_message%";
+        }
+        if (c.blacklist.users == null) c.blacklist.users = new java.util.ArrayList<>();
+        if (c.blacklist.prefixes == null) c.blacklist.prefixes = new java.util.ArrayList<>(java.util.List.of("!"));
+        if (c.blacklist.words == null) c.blacklist.words = new java.util.ArrayList<>();
     }
 
     public static void save() {
@@ -48,8 +81,13 @@ public class ConfigManager {
 
     private static void createNewConfig() {
         config = new Config();
-        // Add some default example data
-        config.streamers.add(new Config.Streamer("your_twitch_channel", "your_minecraft_name"));
+        sanitize(config);
+        // Example streamers – one with a linked MC name + custom hover
+        config.streamers.add(new Config.Streamer(
+                "your_twitch_channel",
+                "your_minecraft_name",
+                "&dLive now on &f%channel%"
+        ));
         config.streamers.add(new Config.Streamer("another_twitch_channel", null));
         config.blacklist.users.add("nightbot");
         save();
